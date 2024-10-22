@@ -14,11 +14,11 @@ public class TerrainBlockRandomizer implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
-	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+        public void onInitialize() {
+        // Assuming a config directory relative to your mod
+        File configDir = new File(FabricLoader.getInstance().getConfigDir().toFile(), "terrainblockrandomizer");
+        configDir.mkdirs(); // Ensure the directory exists
 
-		LOGGER.info("Hello Fabric world!");
-	}
+        Config config = Config.getInstance(configDir);
+    }
 }
