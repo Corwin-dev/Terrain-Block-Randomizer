@@ -37,7 +37,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     // other dependencies
-    modImplementation "me.shedaniel:cloth-config-fabric:8.2.88"
+    modApi("me.shedaniel.cloth:cloth-config-fabric:10.1.135") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
     implementation "com.moandjiezana.toml:toml4j:0.7.2"
 }
 
