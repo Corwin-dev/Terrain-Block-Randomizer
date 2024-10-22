@@ -101,10 +101,12 @@ public class Config {
   
     @Override
     public void onInitialize() {
-        // Assuming a config directory relative to your mod
         File configDir = new File(FabricLoader.getInstance().getConfigDir().toFile(), "terrainblockrandomizer");
         configDir.mkdirs(); // Ensure the directory exists
 
         Config config = Config.getInstance(configDir);
+
+        // Adding default settings for block replacement
+        config.addWorldSetting("block_replacement", "minecraft:grass_block->minecraft:stone");
     }
 }
