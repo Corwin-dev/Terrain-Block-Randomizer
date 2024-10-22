@@ -1,5 +1,6 @@
-package corwin.terrainblockrandomizer;
+package com.example.terrainblockrandomizer;
 
+import com.example.terrainblockrandomizer.world.BiomeModificationHandler;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -14,11 +15,7 @@ public class TerrainBlockRandomizer implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
-        public void onInitialize() {
-        // Assuming a config directory relative to your mod
-        File configDir = new File(FabricLoader.getInstance().getConfigDir().toFile(), "terrainblockrandomizer");
-        configDir.mkdirs(); // Ensure the directory exists
-
-        Config config = Config.getInstance(configDir);
+    public void onInitialize() {
+        BiomeModificationHandler.register();
     }
 }
