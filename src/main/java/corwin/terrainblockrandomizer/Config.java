@@ -2,34 +2,40 @@ package com.example.terrainblockrandomizer.config;
 
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Config {
     // Static instance for global access
     private static Config INSTANCE;
-    
+
     // Maps to hold config variables
     private final Map<String, Object> globalConfig = new HashMap<>();
     private final Map<String, Object> worldConfig = new HashMap<>();
-    
+
     private final File globalConfigFile;
     private final File defaultWorldConfigFile;
 
-    // Constructor
-    private Config(File configDir) {
+    // Private constructor
+    private Config() {
+        Path configDirPath = FabricLoader.getInstance().getConfigDir().resolve("terrainblockrandomizer");
+        File configDir = configDirPath.toFile();
+        configDir.mkdirs(); // Ensure the directory exists
+
         this.globalConfigFile = new File(configDir, "terrainblockrandomizer-global.toml");
         this.defaultWorldConfigFile = new File(configDir, "terrainblockrandomizer-world-defaults.toml");
         loadConfig();
     }
 
     // Singleton access method
-    public static Config getInstance(File configDir) {
+    public static Config getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new Config(configDir);
+            INSTANCE = new Config();
         }
         return INSTANCE;
     }
@@ -97,16 +103,5 @@ public class Config {
 
         // Update worldConfig with world-specific values
         worldConfig.putAll(worldSpecificConfig);
-    }
-  
-    @Override
-    public void onInitialize() {
-        File configDir = new File(FabricLoader.getInstance().getConfigDir().toFile(), "terrainblockrandomizer");
-        configDir.mkdirs(); // Ensure the directory exists
-
-        Config config = Config.getInstance(configDir);
-
-        // Adding default settings for block replacement
-        config.addWorldSetting("block_replacement", "minecraft:grass_block->minecraft:stone");
     }
 }
