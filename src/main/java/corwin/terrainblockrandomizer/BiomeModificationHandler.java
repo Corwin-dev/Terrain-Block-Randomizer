@@ -4,6 +4,7 @@ import com.example.terrainblockrandomizer.config.Config;
 import com.example.terrainblockrandomizer.TerrainBlockRandomizer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
@@ -52,18 +53,18 @@ public class BiomeModificationHandler {
         Block targetBlock = targetBlockOpt.get();
 
         // Use BiomeModifications to modify the biomes
-        BiomeModifications.create(new Identifier(TerrainBlockRandomizer.MOD_ID, "modify_biomes"))
-                .add(
-                    BiomeSelectors.all(),
-                    (selectionContext, modificationContext) -> {
-                        LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
+        BiomeModifications.add(
+            ModificationPhase.ADDITIONS, // Use the appropriate modification phase
+            BiomeSelectors.all(), // Apply to all biomes
+            (selectionContext, modificationContext) -> {
+                LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
 
-                        // Example of modifying the surface builder of the biome
-                        modificationContext.getGenerationSettings().surfaceBuilder().ifPresent(surfaceBuilder -> {
-                            // Add your logic for modifying the surface builder or other biome properties
-                            LOGGER.info("Surface builder modified for biome: {}", selectionContext.getBiomeKey().getValue());
-                        });
-                    }
-                );
+                // Access the surface builder or other settings
+                modificationContext.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
+                    // Logic for modifying surface builder properties or other settings
+                    LOGGER.info("Surface builder modified for biome: {}", selectionContext.getBiomeKey().getValue());
+                });
+            }
+        );
     }
 }
