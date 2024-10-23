@@ -7,13 +7,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registry;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.DefaultBiomeFeatures;
-import net.minecraft.world.gen.GenerationStep;
-
 import java.util.Optional;
 
 public class BiomeModificationHandler {
@@ -26,14 +22,14 @@ public class BiomeModificationHandler {
 
     private static void modifyBiomes() {
         // Access the config to get the block replacement setting
-        String replacementRule = (String) Config.getInstance(null).getWorldSetting("block_replacement");
+        String replacementRule = (String) Config.getInstance().getWorldSetting("block_replacement");
         String[] parts = replacementRule.split("->");
         if (parts.length != 2) {
             return; // Invalid config format, do nothing
         }
 
-        Optional<Block> sourceBlockOpt = Registry.BLOCK.get(new Identifier(parts[0]));
-        Optional<Block> targetBlockOpt = Registry.BLOCK.get(new Identifier(parts[1]));
+        Optional<Block> sourceBlockOpt = Registries.BLOCK.getOrEmpty(new Identifier(parts[0]));
+        Optional<Block> targetBlockOpt = Registries.BLOCK.getOrEmpty(new Identifier(parts[1]));
 
         if (sourceBlockOpt.isEmpty() || targetBlockOpt.isEmpty()) {
             return; // Invalid blocks, do nothing
@@ -43,12 +39,10 @@ public class BiomeModificationHandler {
         Block targetBlock = targetBlockOpt.get();
 
         // Use BiomeModification API to apply changes to all biomes
-        BiomeModification.create(new Identifier("terrainblockrandomizer", "modify_biomes"))
-                .add(BiomeSelectors.all(), (context) -> {
-                    // This is where the biome's surface block can be modified
-                    context.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
-                        surfaceBuilder.getTopMaterial().set(targetBlock.getDefaultState());
-                    });
-                });
+        BiomeModification.INSTANCE.add(BiomeSelectors.all(), (context) -> {
+            context.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
+                // Logic to modify surface block generation here
+            });
+        });
     }
 }
