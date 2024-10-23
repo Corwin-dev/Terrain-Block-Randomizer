@@ -5,34 +5,19 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModification;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.util.registry;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.GenerationSettings;
-import net.minecraft.world.gen.surfacebuilder.SurfaceBuilder;
-import net.minecraft.world.gen.surfacebuilder.SurfaceBuilderConfig;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.world.World;
-package com.example.terrainblockrandomizer.world;
-
-import com.example.terrainblockrandomizer.config.Config;
-import net.fabricmc.fabric.api.biome.v1.BiomeModification;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.GenerationSettings;
-import net.minecraft.world.biome.GenerationSettings.Lookup;
-import net.minecraft.world.biome.GenerationSettings.Updater;
-import net.minecraft.world.biome.GenerationSettings.Config;
-import net.minecraft.world.biome.GenerationSettings.FunctionConfig
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
+import net.minecraft.world.gen.surfacebuilder.SurfaceRuleData;
+import net.minecraft.world.gen.surfacebuilder.SurfaceConfig;
+import net.minecraft.world.World;
+
 import java.util.Optional;
 
 public class BiomeModificationHandler {
@@ -51,8 +36,8 @@ public class BiomeModificationHandler {
             return; // Invalid config format, do nothing
         }
 
-        Optional<Block> sourceBlockOpt = Registry.BLOCK.getOrEmpty(new net.minecraft.util.Identifier(parts[0]));
-        Optional<Block> targetBlockOpt = Registry.BLOCK.getOrEmpty(new net.minecraft.util.Identifier(parts[1]));
+        Optional<Block> sourceBlockOpt = Registry.BLOCK.get(new Identifier(parts[0]));
+        Optional<Block> targetBlockOpt = Registry.BLOCK.get(new Identifier(parts[1]));
 
         if (sourceBlockOpt.isEmpty() || targetBlockOpt.isEmpty()) {
             return; // Invalid blocks, do nothing
@@ -62,25 +47,18 @@ public class BiomeModificationHandler {
         Block targetBlock = targetBlockOpt.get();
 
         // Use BiomeModification API to apply changes to all biomes
-        BiomeModification worldBiomeModification = BiomeModification.create(new net.minecraft.util.Identifier("terrainblockrandomizer", "modify_biomes"));
-        worldBiomeModification.add(BiomeSelectors.all(), (context) -> {
-            // Get the biome and modify its generation settings
-            GenerationSettings.Builder generationSettings = context.getGenerationSettings();
-            
-            // Check if the biome has a SurfaceBuilder and replace its block
-            context.getSurfaceBuilder().ifPresent(builder -> {
-                if (builder instanceof SurfaceBuilderConfig surfaceConfig) {
-                    // Check if the source block matches and replace it with the target block
-                    if (surfaceConfig.getTopMaterial().isOf(sourceBlock)) {
-                        SurfaceBuilderConfig newConfig = new SurfaceBuilderConfig(
-                            targetBlock.getDefaultState(), 
-                            surfaceConfig.getUnderMaterial(), 
-                            surfaceConfig.getUnderwaterMaterial()
+        BiomeModification.create(new Identifier("terrainblockrandomizer", "modify_biomes"))
+                .add(BiomeSelectors.all(), (context) -> {
+                    context.getGenerationSettings().surfaceRule().ifPresent(surfaceRule -> {
+                        MaterialRules.RuleSource modifiedRule = SurfaceRules.sequence(
+                                SurfaceRules.ifTrue(
+                                        SurfaceRules.isBlock(sourceBlock),
+                                        SurfaceRules.block(targetBlock.getDefaultState())
+                                ),
+                                surfaceRule
                         );
-                        context.setSurfaceBuilder(() -> SurfaceBuilder.DEFAULT.configured(newConfig));
-                    }
-                }
-            });
-        });
+                        context.getGenerationSettings().setSurfaceRule(modifiedRule);
+                    });
+                });
     }
 }
