@@ -1,5 +1,6 @@
 package com.example.terrainblockrandomizer;
 
+import com.example.terrainblockrandomizer.config.Config;
 import com.example.terrainblockrandomizer.world.BiomeModificationHandler;
 import net.fabricmc.api.ModInitializer;
 
@@ -16,6 +17,12 @@ public class TerrainBlockRandomizer implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        // Initialize the config system
+        Config config = Config.getInstance();
+
+        // Adding default settings for block replacement
+        config.addWorldSetting("block_replacement", "minecraft:grass_block->minecraft:stone");
+
         BiomeModificationHandler.register();
     }
 }
