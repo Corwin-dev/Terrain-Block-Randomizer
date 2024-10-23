@@ -4,6 +4,7 @@ import com.example.terrainblockrandomizer.config.Config;
 import com.example.terrainblockrandomizer.TerrainBlockRandomizer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
@@ -53,19 +54,32 @@ public class BiomeModificationHandler {
         Block sourceBlock = sourceBlockOpt.get();
         Block targetBlock = targetBlockOpt.get();
 
-        // Use BiomeModifications.create to modify the biomes
-        BiomeModifications.create(new Identifier(TerrainBlockRandomizer.MOD_ID, "modify_biomes"))
-                .add(
-                    BiomeSelectors.all(),
-                    (BiomeSelectionContext selectionContext, BiomeModificationContext modificationContext) -> {
-                        LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
+        // Use BiomeModifications to modify the biomes
+        BiomeModifications.add(
+            ModificationPhase.ADDITIONS,
+            BiomeSelectors.all(),
+            (selectionContext, modificationContext) -> {
+                LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
 
-                        // Modify the generation settings or other properties of the biome here
-                        modificationContext.getGenerationSettings().surfaceBuilder().ifPresent(surfaceBuilder -> {
-                            // Add your logic for modifying the surface builder properties
-                            LOGGER.info("Surface builder modified for biome: {}", selectionContext.getBiomeKey().getValue());
-                        });
-                    }
+                // Access and modify the features or settings of the biome
+                modificationContext.getGenerationSettings().addFeature(
+                    GenerationStep.Feature.TOP_LAYER_MODIFICATION,
+                    createSurfaceReplacementFeature(sourceBlock, targetBlock)
                 );
+            }
+        );
+    }
+
+    // Example method to create a surface replacement feature
+    private static RegistryEntry<PlacedFeature> createSurfaceReplacementFeature(Block sourceBlock, Block targetBlock) {
+        // Define how to create a feature that replaces one block with another
+        // This is an example placeholder, you would need to implement the actual logic
+        // based on how you want to replace blocks in the terrain generation
+        return new PlacedFeature(
+            Feature.NO_OP,
+            new SimpleFeatureConfig(
+                new BlockStateProvider(sourceBlock, targetBlock)
+            )
+        );
     }
 }
