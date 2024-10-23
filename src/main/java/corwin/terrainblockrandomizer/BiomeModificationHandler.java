@@ -8,15 +8,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.DefaultBiomeFeatures;
 import net.minecraft.world.gen.GenerationStep;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
-import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
-import net.minecraft.world.gen.surfacebuilder.SurfaceRuleData;
-import net.minecraft.world.gen.surfacebuilder.SurfaceConfig;
-import net.minecraft.world.World;
 
 import java.util.Optional;
 
@@ -49,15 +45,9 @@ public class BiomeModificationHandler {
         // Use BiomeModification API to apply changes to all biomes
         BiomeModification.create(new Identifier("terrainblockrandomizer", "modify_biomes"))
                 .add(BiomeSelectors.all(), (context) -> {
-                    context.getGenerationSettings().surfaceRule().ifPresent(surfaceRule -> {
-                        MaterialRules.RuleSource modifiedRule = SurfaceRules.sequence(
-                                SurfaceRules.ifTrue(
-                                        SurfaceRules.isBlock(sourceBlock),
-                                        SurfaceRules.block(targetBlock.getDefaultState())
-                                ),
-                                surfaceRule
-                        );
-                        context.getGenerationSettings().setSurfaceRule(modifiedRule);
+                    // This is where the biome's surface block can be modified
+                    context.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
+                        surfaceBuilder.getTopMaterial().set(targetBlock.getDefaultState());
                     });
                 });
     }
