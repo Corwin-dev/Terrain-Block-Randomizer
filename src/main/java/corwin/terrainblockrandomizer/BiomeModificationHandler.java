@@ -12,8 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
-import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
+import net.minecraft.world.gen.SurfaceRules;
 import org.slf4j.Logger;
 
 import java.util.Optional;
