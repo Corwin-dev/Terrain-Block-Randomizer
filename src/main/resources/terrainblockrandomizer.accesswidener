@@ -1,0 +1,3 @@
+access wideners=v1
+accessible class net.minecraft.client.MinecraftClient
+accessible field net.minecraft.world.World height
