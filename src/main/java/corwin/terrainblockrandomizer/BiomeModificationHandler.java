@@ -13,7 +13,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.surfacebuilder.MaterialRules;
-import net.minecraft.world.gen.surfacebuilder.SurfaceRuleContext;
 import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
 import org.slf4j.Logger;
 
@@ -64,16 +63,14 @@ public class BiomeModificationHandler {
             (selectionContext, modificationContext) -> {
                 LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
 
-                // Add a new surface rule for the biome
-                modificationContext.getGenerationSettings().surfaceRule((context) -> {
-                    return SurfaceRules.sequence(
-                        SurfaceRules.ifTrue(
-                            SurfaceRules.isBlock(sourceBlock),
-                            SurfaceRules.block(targetBlockState)
-                        ),
-                        context.getOriginalSurfaceRule()
-                    );
-                });
+                // Modify the surface rules for the biome
+                modificationContext.getGenerationSettings().surfaceRule(SurfaceRules.sequence(
+                    SurfaceRules.ifTrue(
+                        SurfaceRules.isBlock(sourceBlock.getDefaultState()),
+                        SurfaceRules.block(targetBlockState)
+                    ),
+                    modificationContext.getOriginalSurfaceRule()
+                ));
             }
         );
     }
