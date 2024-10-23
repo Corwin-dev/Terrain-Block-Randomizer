@@ -10,8 +10,6 @@ import net.minecraft.block.Block;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.GenerationSettingsLookup;
-import net.minecraft.world.gen.GenerationStep;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -53,17 +51,18 @@ public class BiomeModificationHandler {
         Block sourceBlock = sourceBlockOpt.get();
         Block targetBlock = targetBlockOpt.get();
 
-        // Modify biomes using BiomeModifications
+        // Use BiomeModifications to modify the biomes
         BiomeModifications.create(new Identifier(TerrainBlockRandomizer.MOD_ID, "modify_biomes"))
                 .add(
                     BiomeSelectors.all(),
-                    GenerationStep.Feature.SURFACE_STRUCTURES,
-                    context -> {
-                        GenerationSettingsLookup generationSettings = context.getGenerationSettings();
+                    (context) -> {
                         LOGGER.info("Modifying biome: {}", context.getBiomeKey().getValue());
 
-                        // Modify generation settings or other properties here
-                        // Add logic for setting the target block as a replacement for the source block
+                        // Example of modifying the surface builder of the biome
+                        context.getGenerationSettings().surfaceBuilder().ifPresent(surfaceBuilder -> {
+                            // You can replace or adjust surface blocks here using the surfaceBuilder
+                            LOGGER.info("Surface builder modified for biome: {}", context.getBiomeKey().getValue());
+                        });
                     }
                 );
     }
