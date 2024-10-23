@@ -10,7 +10,6 @@ import net.minecraft.block.Block;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
-import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -53,18 +52,18 @@ public class BiomeModificationHandler {
         Block targetBlock = targetBlockOpt.get();
 
         // Use BiomeModifications to modify the biomes
-        BiomeModifications.add(
-            ModificationPhase.ADDITIONS,
-            BiomeSelectors.all(),
-            (selectionContext, modificationContext) -> {
-                LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
+        BiomeModifications.create(new Identifier(TerrainBlockRandomizer.MOD_ID, "modify_biomes"))
+                .add(
+                    BiomeSelectors.all(),
+                    (selectionContext, modificationContext) -> {
+                        LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
 
-                // Example of modifying the surface builder of the biome
-                modificationContext.getGenerationSettings().surfaceBuilder().ifPresent(surfaceBuilder -> {
-                    // Add your logic for modifying the surface builder or other biome properties
-                    LOGGER.info("Surface builder modified for biome: {}", selectionContext.getBiomeKey().getValue());
-                });
-            }
-        );
+                        // Example of modifying the surface builder of the biome
+                        modificationContext.getGenerationSettings().surfaceBuilder().ifPresent(surfaceBuilder -> {
+                            // Add your logic for modifying the surface builder or other biome properties
+                            LOGGER.info("Surface builder modified for biome: {}", selectionContext.getBiomeKey().getValue());
+                        });
+                    }
+                );
     }
 }
