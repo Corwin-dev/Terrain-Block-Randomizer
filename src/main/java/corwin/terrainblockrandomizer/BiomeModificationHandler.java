@@ -15,7 +15,24 @@ import net.minecraft.world.gen.surfacebuilder.SurfaceBuilderConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.world.World;
+package com.example.terrainblockrandomizer.world;
 
+import com.example.terrainblockrandomizer.config.Config;
+import net.fabricmc.fabric.api.biome.v1.BiomeModification;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.GenerationSettings;
+import net.minecraft.world.biome.GenerationSettings.Lookup;
+import net.minecraft.world.biome.GenerationSettings.Updater;
+import net.minecraft.world.biome.GenerationSettings.Config;
+import net.minecraft.world.biome.GenerationSettings.FunctionConfig
 import java.util.Optional;
 
 public class BiomeModificationHandler {
