@@ -1,23 +1,34 @@
 package com.example.terrainblockrandomizer.world;
 
 import com.example.terrainblockrandomizer.config.Config;
+import com.example.terrainblockrandomizer.TerrainBlockRandomizer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModification;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
+import org.slf4j.Logger;
+
 import java.util.Optional;
 
 public class BiomeModificationHandler {
+    private static final Logger LOGGER = TerrainBlockRandomizer.LOGGER;
 
     public static void register() {
+        LOGGER.info("Registering biome modifications for {}", TerrainBlockRandomizer.MOD_ID);
+
         // Register a listener to modify biomes when the server starts or when the world loads
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> modifyBiomes());
-        ServerWorldEvents.LOAD.register((server, world) -> modifyBiomes());
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            LOGGER.info("Modifying biomes on server start.");
+            modifyBiomes();
+        });
+        ServerWorldEvents.LOAD.register((server, world) -> {
+            LOGGER.info("Modifying biomes when world {} loads.", world.getRegistryKey().getValue());
+            modifyBiomes();
+        });
     }
 
     private static void modifyBiomes() {
@@ -25,6 +36,7 @@ public class BiomeModificationHandler {
         String replacementRule = (String) Config.getInstance().getWorldSetting("block_replacement");
         String[] parts = replacementRule.split("->");
         if (parts.length != 2) {
+            LOGGER.warn("Invalid config format for block replacement.");
             return; // Invalid config format, do nothing
         }
 
@@ -32,16 +44,20 @@ public class BiomeModificationHandler {
         Optional<Block> targetBlockOpt = Registries.BLOCK.getOrEmpty(new Identifier(parts[1]));
 
         if (sourceBlockOpt.isEmpty() || targetBlockOpt.isEmpty()) {
+            LOGGER.warn("Invalid blocks specified in config: {}", replacementRule);
             return; // Invalid blocks, do nothing
         }
 
         Block sourceBlock = sourceBlockOpt.get();
         Block targetBlock = targetBlockOpt.get();
 
-        // Use BiomeModification API to apply changes to all biomes
-        BiomeModification.INSTANCE.add(BiomeSelectors.all(), (context) -> {
+        // Use BiomeModification.of() to create an instance
+        BiomeModification biomeModification = BiomeModification.of(new Identifier(TerrainBlockRandomizer.MOD_ID, "modify_biomes"));
+        biomeModification.add(BiomeSelectors.all(), (context) -> {
+            // Here you can modify the biome's surface block or other properties
             context.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
-                // Logic to modify surface block generation here
+                // Add your logic for modifying the surface builder here
+                LOGGER.info("Modified surface block for biome: {}", context.getBiomeKey().getValue());
             });
         });
     }
