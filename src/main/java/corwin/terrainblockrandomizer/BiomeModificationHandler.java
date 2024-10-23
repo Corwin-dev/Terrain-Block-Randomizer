@@ -8,11 +8,13 @@ import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
-import net.fabricmc.fabric.api.biome.v1.BiomeModificationContext;
+import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import net.minecraft.world.gen.surfacebuilder.SurfaceRuleContext;
+import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -53,33 +55,26 @@ public class BiomeModificationHandler {
 
         Block sourceBlock = sourceBlockOpt.get();
         Block targetBlock = targetBlockOpt.get();
+        BlockState targetBlockState = targetBlock.getDefaultState();
 
         // Use BiomeModifications to modify the biomes
         BiomeModifications.add(
-            ModificationPhase.ADDITIONS,
+            ModificationPhase.REPLACEMENTS,
             BiomeSelectors.all(),
             (selectionContext, modificationContext) -> {
                 LOGGER.info("Modifying biome: {}", selectionContext.getBiomeKey().getValue());
 
-                // Access and modify the features or settings of the biome
-                modificationContext.getGenerationSettings().addFeature(
-                    GenerationStep.Feature.TOP_LAYER_MODIFICATION,
-                    createSurfaceReplacementFeature(sourceBlock, targetBlock)
-                );
+                // Add a new surface rule for the biome
+                modificationContext.getGenerationSettings().surfaceRule((context) -> {
+                    return SurfaceRules.sequence(
+                        SurfaceRules.ifTrue(
+                            SurfaceRules.isBlock(sourceBlock),
+                            SurfaceRules.block(targetBlockState)
+                        ),
+                        context.getOriginalSurfaceRule()
+                    );
+                });
             }
-        );
-    }
-
-    // Example method to create a surface replacement feature
-    private static RegistryEntry<PlacedFeature> createSurfaceReplacementFeature(Block sourceBlock, Block targetBlock) {
-        // Define how to create a feature that replaces one block with another
-        // This is an example placeholder, you would need to implement the actual logic
-        // based on how you want to replace blocks in the terrain generation
-        return new PlacedFeature(
-            Feature.NO_OP,
-            new SimpleFeatureConfig(
-                new BlockStateProvider(sourceBlock, targetBlock)
-            )
         );
     }
 }
