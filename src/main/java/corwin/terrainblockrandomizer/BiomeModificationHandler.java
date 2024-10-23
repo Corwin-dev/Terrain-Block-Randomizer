@@ -2,7 +2,7 @@ package com.example.terrainblockrandomizer.world;
 
 import com.example.terrainblockrandomizer.config.Config;
 import com.example.terrainblockrandomizer.TerrainBlockRandomizer;
-import net.fabricmc.fabric.api.biome.v1.BiomeModification;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.GenerationStep;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -51,14 +52,15 @@ public class BiomeModificationHandler {
         Block sourceBlock = sourceBlockOpt.get();
         Block targetBlock = targetBlockOpt.get();
 
-        // Use BiomeModification.of() to create an instance
-        BiomeModification biomeModification = BiomeModification.of(new Identifier(TerrainBlockRandomizer.MOD_ID, "modify_biomes"));
-        biomeModification.add(BiomeSelectors.all(), (context) -> {
-            // Here you can modify the biome's surface block or other properties
-            context.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
-                // Add your logic for modifying the surface builder here
-                LOGGER.info("Modified surface block for biome: {}", context.getBiomeKey().getValue());
-            });
-        });
+        // Use BiomeModifications.add to modify biomes
+        BiomeModifications.addProperties(
+            BiomeSelectors.all(),
+            (context) -> {
+                context.getGenerationSettings().getSurfaceBuilder().ifPresent(surfaceBuilder -> {
+                    // Logic to modify the surface builder or other biome properties
+                    LOGGER.info("Modifying biome: {}", context.getBiomeKey().getValue());
+                });
+            }
+        );
     }
 }
